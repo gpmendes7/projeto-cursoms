@@ -1,0 +1,11 @@
+#rodar aplicacao
+./mvnw spring-boot:run
+mvn spring-boot:run
+
+# gerar jar (compilacao)
+./mvnw clean package -DskipTests
+
+# rodar jar
+cd target
+java -jar <nomedojar>
+java -jar .\eurekaserver-0.0.1-SNAPSHOT.jar

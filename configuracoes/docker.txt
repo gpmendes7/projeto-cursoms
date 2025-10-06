@@ -1,0 +1,40 @@
+# buildar imagem
+docker build --tag cursoms-eureka . 
+docker build --tag cursoms-cartoes .
+
+# rodar imagem (criar container)
+docker run --name teste-eureka -p 8761:8761 cursoms-eureka
+docker run --name cursoms-eureka -p 8761:8761 cursoms-eureka
+docker run --name cursoms-cartoes cursoms-cartoes
+
+# criar network
+docker network create cursoms-network
+
+# criar container com network
+docker run --name cursoms-eureka -p 8761:8761 --network cursoms-network cursoms-eureka
+docker run --name cursoms-cartoes --network cursoms-network cursoms-cartoes
+
+# listar networks
+docker network ls
+
+# parar container
+docker container stop teste-eureka
+docker container stop cursoms-eureka
+docker container stop cursoms-cartoes
+docker stop cursoms-cartoes
+
+# remover container 
+docker container rm teste-eureka
+docker container rm cursoms-eureka
+docker container rm cursoms-cartoes
+docker rm cursoms-cartoes
+
+# remover imagem
+docker image rm cursoms-eureka
+docker image rm cursoms-cartoes
+
+# ver log
+docker logs cursoms-cartoes
+
+
+

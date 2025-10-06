@@ -1,0 +1,29 @@
+# buildar imagens (na raiz de cada projeto que tem o arquivo dockerFile)
+docker build --tag cursoms-eureka . 
+docker build --tag cursoms-cartoes .
+docker build --tag cursoms-clientes .
+docker build --tag cursoms-avaliadorcredito .
+docker build -t cursoms-gateway .
+
+# criar network
+docker network create cursoms-network
+
+# criar container com network
+docker run --name cursoms-eureka -p 8761:8761 --network cursoms-network cursoms-eureka
+docker run -it --name cursoms-rabbitmq -p 5672:5672 -p 15672:15672 --network cursoms-network rabbitmq:3.9-management
+docker run --name cursoms-cartoes --network cursoms-network cursoms-cartoes
+
+# criar container com network e variáveis de ambiente
+docker run --name cursoms-cartoes --network cursoms-network -e RABBITMQ_SERVER=cursoms-rabbitmq -e EUREKA_SERVER=cursoms-eureka -d cursoms-cartoes
+
+docker run --name cursoms-clientes --network cursoms-network -e EUREKA_SERVER=cursoms-eureka -d cursoms-clientes
+
+docker run --name cursoms-avaliadorcredito --network cursoms-network -e RABBITMQ_SERVER=cursoms-rabbitmq -e EUREKA_SERVER=cursoms-eureka -d cursoms-avaliadorcredito
+
+docker run -p 8081:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin --network cursoms-network --name cursoms-keycloak quay.io/keycloak/keycloak:18.0.0 start-dev
+
+docker run --name cursoms-gateway -p 8080:8080 -e EUREKA_SERVER=cursoms-eureka -e KEYCLOAK_SERVER=cursoms-keycloak -e KEYCLOAK_PORT=8080 --network cursoms-network -d cursoms-gateway
+
+# rodar na raiz do projeto projeto-cursoms o comando:
+# averiguar que JVA_HOME aponta para jdk 17
+mvn clean install -DskipTests
